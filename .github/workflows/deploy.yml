@@ -2,7 +2,7 @@ name: Deploy to Github Pages
 on:
   push:
     branches:
-      - develop
+      - erick/pruebas
 
 jobs:
   deploy:
@@ -21,9 +21,9 @@ jobs:
           yarn install
           yarn build
       - name: Deploy
-        uses: s0/git-publish-subdir-action@develop
+        uses: s0/git-publish-subdir-action@erick/pruebas
         env:
           REPO: self
-          BRANCH: develop_deploy
+          BRANCH: erick/pruebas_deploy
           FOLDER: dist
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
