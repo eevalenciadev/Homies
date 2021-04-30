@@ -1,6 +1,7 @@
 {
   "name": "homies",
   "short_name": "homies",
+  "start_url": "./",
   "icons": [
     {
       "src": "icons/android-chrome-192x192.png",
