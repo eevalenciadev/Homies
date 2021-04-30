@@ -21,7 +21,7 @@ jobs:
           yarn install
           yarn build
       - name: Deploy
-        uses: s0/git-publish-subdir-action@erick/pruebas
+        uses: s0/git-publish-subdir-action@main
         env:
           REPO: self
           BRANCH: erick/pruebas_deploy
