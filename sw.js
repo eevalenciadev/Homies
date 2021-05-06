@@ -1,57 +1,49 @@
-//asignar un nombre y versión al cache
-const CACHE_NAME = "v1_cache_programador_fitness",
-  urlsToCache = [
-    "./",
-    "./icons/android-chrome-512x512.png",
-    "./icons/favicon-16x16.png",
-    "./script.js"
-  ];
+importScripts("./scripts/sw-utils.js");
 
-//durante la fase de instalación, generalmente se almacena en caché los activos estáticos
+const CACHE_ESTATICO = "estatico-v1";
+const CACHE_DINAMICO = "dinamico-v1";
+const CACHE_INMUTABLE = "inmutable-v1";
+
+const URLS_ESTATICO = [
+  "./",
+  "./icons/android-chrome-192x192.png",
+  "./icons/android-chrome-512x512.png",
+  "./icons/apple-touch-icon.png",
+  "./icons/favicon-16x16.png",
+  "./icons/favicon-32x32.png",
+  "./favicon.ico",
+  "./manifest.json",
+  "./script.js",
+  "./scripts/sw-utils.js",
+];
+const URLS_DINAMICO = [
+  "https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900",
+  "https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css",
+];
+
 self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache).then(() => self.skipWaiting());
-      })
-      .catch((err) => console.log("Falló registro de cache", err))
-  );
+  const cacheEstatico = agregarCache(CACHE_ESTATICO, URLS_ESTATICO);
+  const cacheInmutable = agregarCache(CACHE_INMUTABLE, URLS_DINAMICO);
+
+  var respuesta = Promise.all([cacheEstatico, cacheInmutable]).then(() => {
+    self.skipWaiting();
+  });
+  e.waitUntil(respuesta);
 });
 
-//una vez que se instala el SW, se activa y busca los recursos para hacer que funcione sin conexión
 self.addEventListener("activate", (e) => {
-  const cacheWhitelist = [CACHE_NAME];
-
-  e.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            //Eliminamos lo que ya no se necesita en cache
-            if (cacheWhitelist.indexOf(cacheName) === -1) {
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      // Le indica al SW activar el cache actual
-      .then(() => self.clients.claim())
-  );
+  const respuesta = depurarCache([CACHE_ESTATICO, CACHE_INMUTABLE]);
+  e.waitUntil(respuesta);
 });
 
-//cuando el navegador recupera una url
 self.addEventListener("fetch", (e) => {
-  //Responder ya sea con el objeto en caché o continuar y buscar la url real
-  e.respondWith(
-    caches.match(e.request).then((res) => {
-      if (res) {
-        //recuperar del cache
-        return res;
-      }
-      //recuperar de la petición a la url
-      return fetch(e.request);
-    })
-  );
+  var respuesta = caches.match(e.request).then((res) => {
+    if (res) {
+      return res;
+    }
+    return fetch(e.request).then((res) => {
+      return actualizarCacheDinamico(CACHE_DINAMICO, e.request, res);
+    });
+  });
+  e.respondWith(respuesta);
 });
