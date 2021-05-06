@@ -43,7 +43,8 @@ const actualizarCacheDinamico = async (cacheNombre, request, response) => {
     request.url.includes("/js") ||
     request.url.includes("/css") ||
     request.url.includes("/img") ||
-    request.url.includes("cdn")
+    request.url.includes("cdn") ||
+    request.url.includes("https://fonts.gstatic.com/")
   ) {
     return actualizarCache(cacheNombre, request, response);
   }
