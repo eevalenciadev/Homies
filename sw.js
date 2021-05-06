@@ -1,10 +1,14 @@
 importScripts("./scripts/sw-utils.js");
 
+const CACHE_INMUTABLE = "inmutable-v1";
 const CACHE_ESTATICO = "estatico-v1";
 const CACHE_DINAMICO = "dinamico-v1";
-const CACHE_INMUTABLE = "inmutable-v1";
 
-const URLS_ESTATICO = [
+const RUTAS_INMUTABLE = [
+  "https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900",
+  "https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css",
+];
+const RUTAS_ESTATICO = [
   "./",
   "./icons/android-chrome-192x192.png",
   "./icons/android-chrome-512x512.png",
@@ -16,14 +20,17 @@ const URLS_ESTATICO = [
   "./script.js",
   "./scripts/sw-utils.js",
 ];
-const URLS_DINAMICO = [
-  "https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900",
-  "https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css",
+const RUTAS_DINAMICO = [
+  "/js",
+  "/css",
+  "/img",
+  "https://cdn",
+  "https://fonts.gstatic.com/",
 ];
 
 self.addEventListener("install", (e) => {
-  const cacheEstatico = agregarCache(CACHE_ESTATICO, URLS_ESTATICO);
-  const cacheInmutable = agregarCache(CACHE_INMUTABLE, URLS_DINAMICO);
+  const cacheEstatico = agregarCache(CACHE_ESTATICO, RUTAS_ESTATICO);
+  const cacheInmutable = agregarCache(CACHE_INMUTABLE, RUTAS_INMUTABLE);
 
   var respuesta = Promise.all([cacheEstatico, cacheInmutable]).then(() => {
     self.skipWaiting();
@@ -37,12 +44,17 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  var respuesta = caches.match(e.request).then((res) => {
-    if (res) {
-      return res;
+  var respuesta = caches.match(e.request).then((response) => {
+    if (response) {
+      return response;
     }
-    return fetch(e.request).then((res) => {
-      return actualizarCacheDinamico(CACHE_DINAMICO, e.request, res);
+    return fetch(e.request).then((response) => {
+      return actualizarCacheDinamico(
+        CACHE_DINAMICO,
+        RUTAS_DINAMICO,
+        e.request,
+        response
+      );
     });
   });
   e.respondWith(respuesta);
