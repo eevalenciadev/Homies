@@ -39,7 +39,12 @@ const actualizarCache = async (cacheNombre, request, response) => {
  * @param { Response } response
  */
 const actualizarCacheDinamico = async (cacheNombre, request, response) => {
-  if (request.url.includes("js/")) {
+  if (
+    request.url.includes("/js") ||
+    request.url.includes("/css") ||
+    request.url.includes("/img") ||
+    request.url.includes("cdn")
+  ) {
     return actualizarCache(cacheNombre, request, response);
   }
   return response;
