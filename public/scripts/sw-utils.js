@@ -1,11 +1,11 @@
 /**
- * Almacena las respuestas de las URL que serán almacenadas en caché
+ * Almacena las respuestas de las rutas que serán almacenadas en caché
  * @param { string } cacheNombre
- * @param { string[] } urls
+ * @param { string[] } rutas
  */
-const agregarCache = async (cacheNombre, urls) => {
+const agregarCache = async (cacheNombre, rutas) => {
   var cache = await caches.open(cacheNombre);
-  cache.addAll(urls);
+  cache.addAll(rutas);
 };
 
 /**
@@ -35,17 +35,18 @@ const actualizarCache = async (cacheNombre, request, response) => {
 /**
  *
  * @param { string } cacheNombre
+ * @param { string[] } rutas
  * @param { RequestInfo } request
  * @param { Response } response
  */
-const actualizarCacheDinamico = async (cacheNombre, request, response) => {
-  if (
-    request.url.includes("/js") ||
-    request.url.includes("/css") ||
-    request.url.includes("/img") ||
-    request.url.includes("cdn") ||
-    request.url.includes("https://fonts.gstatic.com/")
-  ) {
+const actualizarCacheDinamico = async (
+  cacheNombre,
+  rutas,
+  request,
+  response
+) => {
+  var ruta = rutas.find((ruta) => request.url.includes(ruta));
+  if (ruta) {
     return actualizarCache(cacheNombre, request, response);
   }
   return response;
